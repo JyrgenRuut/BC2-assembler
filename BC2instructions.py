@@ -56,7 +56,10 @@ def instr_Jmp(instruction, pointers, fo):
 	if temp == None:
 		CustomError.ERR_labelMissing(instruction[-1])
 		return 0
-	low_bytes = int(temp)
+	low_bytes = int(temp) * 2
+	if low_bytes > 65535:
+		CustomError.ERR_outOfBounds(instruction[-1])
+		return 0
 	fo.write("{}{}{} {}".format(top_byte, '0', topmid_byte_bottom_nibble,"%.4x"%(low_bytes)))
 	return 1
 

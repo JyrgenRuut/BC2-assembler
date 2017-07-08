@@ -13,7 +13,7 @@ def parseAssembly(fi, instructions, pointers):
 				pointers.update({reference:counter})
 				counter -= 1
 		elif instruction[0][0] != '/':
-			instruction.append(true_counter)
+			instruction.append(true_counter + 1)
 			instructions.append(instruction)
 		true_counter += 1
 		counter += 1

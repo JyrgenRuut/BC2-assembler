@@ -18,3 +18,5 @@ def ERR_labelMissing(line):
 def ERR_invalidValue(line, position):
 	print(atline, line, "; Invalid argument value at argument position: ", position)
 
+def ERR_outOfBounds(line):
+	print(atline, line, "; Label reference results in an address outside of the allowed 64K range.")
