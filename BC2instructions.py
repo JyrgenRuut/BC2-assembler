@@ -19,9 +19,26 @@ jump_flags = {
 
 def instr_Jmp(instruction, pointers, fo):
 	top_byte = "0d"
+	if len(instruction) < 4:
+		if len(instruction) < 3:
+			CustomError.ERR_missingArgument(instruction[-1], '1')
+			return
+		CustomError.ERR_missingArgument(instruction[-1], '2')
+		return
 	topmid_byte = jump_flags.get(instruction[1], None)
-	if topmid_byte = None:
-		print(
+	if topmid_byte == None:
+		CustomError.ERR_invalidArgument(instruction[-1], '1')
+		return
+	if instruction[2][0] != '&':
+		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "reference")
+		return
+	temp = pointers.get(instruction[2], None)
+	if temp == None:
+		CustomError.ERR_labelMissing(instruction[-1])
+		return
+	low_bytes = int(temp)
+	fo.write(top_byte, topmid_byte, low_bytes)
+		
 	
 def instr_Inc(instruction, pointers, fo):
 	
@@ -37,7 +54,13 @@ def instr_Call(instruction, pointers, fo):
 def instr_Ret(instruction, pointers, fo):
 	print(instruction)
 def instr_Mov(instruction, pointers, fo):
-	print(instruction)
+	if instruction[2][0] == 'h':
+		
+	elif instruction[2][0] == 'd':
+		int(
+		 
+	print("%5.4x"% (47))
+
 def instr_Add(instruction, pointers, fo):
 	print(instruction)
 def instr_Addc(instruction, pointers, fo):
