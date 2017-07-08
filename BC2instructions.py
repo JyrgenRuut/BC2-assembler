@@ -37,6 +37,42 @@ registers = {
 	"rsp":	'f'
 }
 
+def threeRegFieldInstruction(instruction, pointers, fo, opcode):
+	top_byte = opcode
+	instruction_length = len(instruction)
+	if instruction_length < 5:
+		if instruction_length < 4:
+			if instruction_lenth < 3:
+				CustomError.ERR_missingArgument(instruction[-1], '1')
+				return 0
+			CustomError.ERR_missingArgument(instruction[-1], '2')
+			return 0
+		CustomError.ERR_missingArgument(instruction[-1], '3')
+		return 0
+	if instruction[1][0] != 'r':
+		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
+		return 0
+	elif instruction[2][0] != 'r':
+		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "register reference")
+		return 0
+	elif instruction[3][0] != 'r':
+		CustomError.ERR_invalidArgumentType(instruction[-1], '3', "register reference")
+		return 0
+	topmid_byte_top_nibble = registers.get(instruction[1], None)
+	if topmid_byte_top_nibble == None:
+		CustomError.ERR_invalidValue(instruction[-1], '1')
+		return 0
+	topmid_byte_bottom_nibble = register.get(instruction[2], None)
+	if topmid_byte_bottom_nibble == None:
+		CustomError.ERR_invalidValue(instruction[-1], '2')
+		return 0
+	botmid_byte_top_nibble = registers.get(instruction[3], None)
+	if botmid_byte_top_nibble == None:
+		CustomError.ERR_invalidValue(instruction[-1], '3')
+		return 0
+	fo.write("{}{}{} {}{}".format(top_byte, topmid_byte_top_nibble, topmid_byte_bottom_nibble, botmid_byte_top_nibble, "000"))
+	return 1
+
 def writeAndRead1Instruction(instruction, pointers, fo, opcode):
 	top_byte = opcode
 	if len(instruction) < 4:
@@ -152,8 +188,7 @@ def instr_Mov(instruction, pointers, fo):
 		fo.write("{}{}{} {}".format(top_byte, topmid_byte_top_nibble, topmid_byte_bottom_nibble, "0000"))
 		return 1
 	elif instruction[2][0] == 'd':
-		tempnum = int(instruction[3][1:])
-		if -32768 < tempnum < 32767:
+		if -32768 < int(instruction[3][1:]) < 32767:
 			CustomError.ERR_invalidValue(instruction[-1], '2')
 			return 0
 		else:
@@ -174,19 +209,26 @@ def instr_Mov(instruction, pointers, fo):
 		return 0
 
 def instr_Add(instruction, pointers, fo):
-	print(instruction)
+	return threeRegFieldInstruction(instruction,pointers, fo, "01")
+
 def instr_Addc(instruction, pointers, fo):
-	print(instruction)
+	return threeRegFieldInstruction(instruction,pointers, fo, "02")
+
 def instr_Sub(instruction, pointers, fo):
-	print(instruction)
+	return threeRegFieldInstruction(instruction,pointers, fo, "03")
+
 def instr_Subb(instruction, pointers, fo):
-	print(instruction)
+	return threeRegFieldInstruction(instruction,pointers, fo, "04")
+
 def instr_Xor(instruction, pointers, fo):
-	print(instruction)
+	return threeRegFieldInstruction(instruction,pointers, fo, "05")
+
 def instr_And(instruction, pointers, fo):
-	print(instruction)
+	return threeRegFieldInstruction(instruction,pointers, fo, "06")
+
 def instr_Or(instruction, pointers, fo):
-	print(instruction)
+	return threeRegFieldInstruction(instruction,pointers, fo, "07")
+
 def instr_Save(instruction, pointers, fo):
 	print(instruction)
 def instr_Load(instruction, pointers, fo):
