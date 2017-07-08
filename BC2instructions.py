@@ -188,21 +188,21 @@ def instr_Mov(instruction, pointers, fo):
 		fo.write("{}{}{} {}".format(top_byte, topmid_byte_top_nibble, topmid_byte_bottom_nibble, "0000"))
 		return 1
 	elif instruction[2][0] == 'd':
-		if -32768 < int(instruction[3][1:]) < 32767:
+		if -32768 > int(instruction[3][1:]) > 32767:
 			CustomError.ERR_invalidValue(instruction[-1], '2')
 			return 0
 		else:
 			fo.write("{}{}{} {}".format(top_byte, topmid_byte_top_nibble, '0', "%4.4x"%(int(instruction[3][1:]))))
 			return 1
-	elif instruction[2].length == 5 and instruction[2][0] == 'h':
+	elif len(instruction[2]) == 5 and instruction[2][0] == 'h':
 		bottom_bytes = []
 		for c in instruction[2][1:]:
-			if c >= 0 and c <= 9 or c == 'a' or c == 'b' or c == 'c' or c == 'd' or c== 'e' or c == 'f':
+			if '0' <= c <= '9' or 'a' <= c <= 'f':
 				bottom_bytes.append(c)
 			else:
 				CustomError.ERR_invalidValue(instruction[-1], '2')
 				return 0
-		fo.write("{}{}{} {}{}{}{}".format(top_byte, topmid_byte_top_nibble, '0', instruction[2][1], instruction[2][2], instruction[2][3], instruction[2][4]))
+		fo.write("{}{}{} {}".format(top_byte, topmid_byte_top_nibble, '0', instruction[2][1:]))
 		return 1
 	else:
 		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "d (decimal), h (hexadecimal) or r (register reference)")
