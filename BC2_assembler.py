@@ -8,6 +8,8 @@ import CustomError
 input_file = []
 instructions = []
 pointers = {}
+assembly_failed = 0
+counter = 0
 
 fi = open("input.txt", "r")
 temp = fi.readlines()
@@ -20,5 +22,18 @@ fi.close()
 fo = open("Output.txt", "w")
 
 for instruction in instructions:
-	BC2instructions.resolveInstruction(instruction, pointers, fo)
+	wasResolved = BC2instructions.resolveInstruction(instruction, pointers, fo)
+	if wasResolved == 0:
+		assembly_failed = 1
+	counter += 1
+	if counter % 4 == 0:
+		fo.write("\n")
+	else:
+		fo.write(' ')
+
+if assembly_failed == 1:
+	fo.close()
+	file_delete = open("Output.txt", "w")
+	file_delete.write("Assembly of the source file failed, please resolve all errors.")
+	file_delete.close()
 

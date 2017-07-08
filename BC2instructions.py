@@ -1,3 +1,4 @@
+import CustomError
 
 jump_flags = {
 	"always"	: "0",	"a"		: "0",
@@ -41,71 +42,74 @@ def instr_Jmp(instruction, pointers, fo):
 	if len(instruction) < 4:
 		if len(instruction) < 3:
 			CustomError.ERR_missingArgument(instruction[-1], '1')
-			return
+			return 1
 		CustomError.ERR_missingArgument(instruction[-1], '2')
-		return
-	topmid_byte = jump_flags.get(instruction[1], None)
-	if topmid_byte == None:
+		return 0
+	topmid_byte_bottom_nibble = jump_flags.get(instruction[1], None)
+	if topmid_byte_bottom_nibble == None:
 		CustomError.ERR_invalidArgument(instruction[-1], '1')
-		return
+		return 0
 	if instruction[2][0] != '&':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "reference")
-		return
+		return 0
 	temp = pointers.get(instruction[2], None)
 	if temp == None:
 		CustomError.ERR_labelMissing(instruction[-1])
-		return
+		return 0
 	low_bytes = int(temp)
-	fo.write(top_byte, topmid_byte, ".4x"%(low_bytes))
+	fo.write("{}{}{} {}".format(top_byte, '0', topmid_byte_bottom_nibble,"%.4x"%(low_bytes)))
+	return 1
 
 def instr_Inc(instruction, pointers, fo):
 	top_byte = "17"
 	if len(instruction) < 4:
 		if len(instruction) < 3:
 			CustomError.ERR_missingArgument(instruction[-1], '1')
-			return
+			return 0
 		CustomError.ERR_missingArgument(instruction[-1], '2')
-		return
-	if instruction[2][0] != 'r':
+		return 0
+	if instruction[1][0] != 'r':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
-		return
-	elif instruction[3][0] != 'r':
+		return 0
+	elif instruction[2][0] != 'r':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "register reference")
-		return
-	topmid_byte_top_nibble = registers.get([instruction[2], None)
-	if topmid_byte == None:
+		return 0
+	topmid_byte_top_nibble = registers.get(instruction[1], None)
+	if topmid_byte_top_nibble == None:
 		CustomError.ERR_invalidValue(instruction[-1], '1')
-		return
-	botmid_byte_top_nibble = registers.get(instruction[3], None)
-	if botmid_byte == None:
+		return 0
+	botmid_byte_top_nibble = registers.get(instruction[2], None)
+	if botmid_byte_top_nibble == None:
 		CustomError.ERR_invalidValue(instruction[-1], '2')
-		return
-	fo.write(top_byte, topmid_byte_top_nibble, '0' botmid_byte_top_nibble, "000")
+		return 0
+	fo.write("{}{}{} {}{}".format(top_byte, topmid_byte_top_nibble, '0', botmid_byte_top_nibble, "000"))
+	return 1
 	
 	
 def instr_Dec(instruction, pointers, fo):
-	top_byte = "17"
+	top_byte = "18"
 	if len(instruction) < 4:
 		if len(instruction) < 3:
 			CustomError.ERR_missingArgument(instruction[-1], '1')
-			return
+			return 0
 		CustomError.ERR_missingArgument(instruction[-1], '2')
-		return
-	if instruction[2][0] != 'r':
+		return 0
+	if instruction[1][0] != 'r':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
-		return
-	elif instruction[3][0] != 'r':
+		return 0
+	elif instruction[2][0] != 'r':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "register reference")
-		return
-	if int(instruction[2][1:]) >= 16 or int(instruction[2][1:]) < 0:
+		return 0
+	topmid_byte_top_nibble = registers.get(instruction[2], None)
+	if topmid_byte_top_nibble == None:
 		CustomError.ERR_invalidValue(instruction[-1], '1')
-		return
-	elif int(instruction[3][1:]) >= 16 or int(instruction[3][1:]) < 0:
+		return 0
+	botmid_byte_top_nibble = registers.get(instruction[3], None)
+	if botmid_byte_top_nibble == None:
 		CustomError.ERR_invalidValue(instruction[-1], '2')
-		return
-	topmid_byte = ".1x"%(int(instruction[2][1:])) + '0'
-	botmid_byte = ".1x"%(int(instruction[2][1:])) + '0'
-	fo.write(top_byte, topmid_byte, botmid_byte, "00")
+		return 0
+	fo.write("{}{}{} {}{}".format(top_byte, topmid_byte_top_nibble, '0', botmid_byte_top_nibble, "000"))
+	return 1
 
 
 def instr_Push(instruction, pointers, fo):
@@ -117,12 +121,48 @@ def instr_Call(instruction, pointers, fo):
 def instr_Ret(instruction, pointers, fo):
 	print(instruction)
 def instr_Mov(instruction, pointers, fo):
-	if instruction[2][0] == 'h':
-		
+	top_byte = "00"
+	if len(instruction) < 4:
+		if len(instruction) < 3:
+			CustomError.ERR_missingArgument(instruction[-1], '1')
+			return 0
+		CustomError.ERR_missingArgument(instruction[-1], '2')
+		return 0
+	if instruction[1][0] != 'r':
+		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
+		return 0
+	topmid_byte_top_nibble = registers.get(instruction[1], None)
+	if topmid_byte_top_nibble == None:
+		CustomError.ERR_invalidValue(instruction[-1], '1')
+		return 0
+	if instruction[2][0] == 'r':
+		topmid_bottom_nibble = registers.get(instruction[2], None)
+		if topmid_bottom_nibble == None:
+			CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
+			return 0
+		fo.write("{}{}{} {}".format(top_byte, topmid_byte_top_nibble, topmid_byte_bottom_nibble, "0000"))
+		return 1
 	elif instruction[2][0] == 'd':
-		int(
-		 
-	print("%5.4x"% (47))
+		tempnum = int(instruction[3][1:])
+		if -32768 < tempnum < 32767:
+			CustomError.ERR_invalidValue(instruction[-1], '2')
+			return 0
+		else:
+			fo.write("{}{}{} {}".format(top_byte, topmid_byte_top_nibble, '0', "%4.4x"%(int(instruction[3][1:]))))
+			return 1
+	elif instruction[2].length == 5 and instruction[2][0] == 'h':
+		bottom_bytes = []
+		for c in instruction[2][1:]:
+			if c >= 0 and c <= 9 or c == 'a' or c == 'b' or c == 'c' or c == 'd' or c== 'e' or c == 'f':
+				bottom_bytes.append(c)
+			else:
+				CustomError.ERR_invalidValue(instruction[-1], '2')
+				return 0
+		fo.write("{}{}{} {}{}{}{}".format(top_byte, topmid_byte_top_nibble, '0', instruction[2][1], instruction[2][2], instruction[2][3], instruction[2][4]))
+		return 1
+	else:
+		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "d (decimal), h (hexadecimal) or r (register reference)")
+		return 0
 
 def instr_Add(instruction, pointers, fo):
 	print(instruction)
@@ -160,6 +200,8 @@ def instr_Int(instruction, pointers, fo):
 	print(instruction)
 def instr_Tst(instruction, pointers, fo):
 	print(instruction)
+def instr_Nop(instruction, pointers, fo):
+	fo.write("0000 0000")
 	
 instructions_repository = {
 	"jmp": instr_Jmp,
@@ -187,9 +229,10 @@ instructions_repository = {
 	"pushf": instr_Pushf,
 	"popf": instr_Popf,
 	"int": instr_Int,
-	"tst": instr_Tst
+	"tst": instr_Tst,
+	"nop": instr_Nop
 }
 
 
 def resolveInstruction(instruction, pointers, fo):
-	instructions_repository[instruction[0]](instruction, pointers, fo)
+	return instructions_repository[instruction[0]](instruction, pointers, fo)
