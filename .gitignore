@@ -1,2 +1,4 @@
 *.circ
 *.xlsx
+input.txt
+__pycache__/
