@@ -1,6 +1,7 @@
 import sys
 import BC2parser
 import BC2instructions
+import CustomError
 
 #assembly_file, output_file = sys.argv[1], sys.arv[2]
 

@@ -15,5 +15,6 @@ def ERR_invalidArgumentType(line, position, requirement):
 def ERR_labelMissing(line):
 	print(atline, line, "; Reference to label can not be resolved, label is missing from source.")
 
-
+def ERR_invalidValue(line, position):
+	print(atline, line, "; Invalid argument value at argument position: ", position)
 

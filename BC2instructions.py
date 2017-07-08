@@ -37,14 +37,58 @@ def instr_Jmp(instruction, pointers, fo):
 		CustomError.ERR_labelMissing(instruction[-1])
 		return
 	low_bytes = int(temp)
-	fo.write(top_byte, topmid_byte, low_bytes)
-		
-	
+	fo.write(top_byte, topmid_byte, ".4x"%(low_bytes))
+
 def instr_Inc(instruction, pointers, fo):
+	top_byte = "17"
+	if len(instruction) < 4:
+		if len(instruction) < 3:
+			CustomError.ERR_missingArgument(instruction[-1], '1')
+			return
+		CustomError.ERR_missingArgument(instruction[-1], '2')
+		return
+	if instruction[2][0] != 'r':
+		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
+		return
+	elif instruction[3][0] != 'r':
+		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "register reference")
+		return
+	if int(instruction[2][1:]) >= 16 or int(instruction[2][1:]) < 0:
+		CustomError.ERR_invalidValue(instruction[-1], '1')
+		return
+	elif int(instruction[3][1:]) >= 16 or int(instruction[3][1:]) < 0:
+		CustomError.ERR_invalidValue(instruction[-1], '2')
+		return
+	topmid_byte = ".1x"%(int(instruction[2][1:])) + '0'
+	botmid_byte = ".1x"%(int(instruction[2][1:])) + '0'
+	fo.write(top_byte, topmid_byte, botmid_byte, "00")
 	
 	
 def instr_Dec(instruction, pointers, fo):
-	print(instruction)
+	top_byte = "17"
+	if len(instruction) < 4:
+		if len(instruction) < 3:
+			CustomError.ERR_missingArgument(instruction[-1], '1')
+			return
+		CustomError.ERR_missingArgument(instruction[-1], '2')
+		return
+	if instruction[2][0] != 'r':
+		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
+		return
+	elif instruction[3][0] != 'r':
+		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "register reference")
+		return
+	if int(instruction[2][1:]) >= 16 or int(instruction[2][1:]) < 0:
+		CustomError.ERR_invalidValue(instruction[-1], '1')
+		return
+	elif int(instruction[3][1:]) >= 16 or int(instruction[3][1:]) < 0:
+		CustomError.ERR_invalidValue(instruction[-1], '2')
+		return
+	topmid_byte = ".1x"%(int(instruction[2][1:])) + '0'
+	botmid_byte = ".1x"%(int(instruction[2][1:])) + '0'
+	fo.write(top_byte, topmid_byte, botmid_byte, "00")
+
+
 def instr_Push(instruction, pointers, fo):
 	print(instruction)
 def instr_Pop(instruction, pointers, fo):
