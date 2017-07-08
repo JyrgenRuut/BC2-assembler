@@ -17,6 +17,25 @@ jump_flags = {
 	"A<=B"		: "e",	"ltoe"	: "e"
 }
 
+registers = {
+	"rz":	'0',
+	"r1":	'1',
+	"r2":	'2',
+	"r3":	'3',
+	"r4":	'4',
+	"r5":	'5',
+	"r6":	'6',
+	"r7":	'7',
+	"r8":	'8',
+	"r9":	'9',
+	"r10":	'a',
+	"r11":	'b',
+	"r12":	'c',
+	"rdp":	'd',
+	"rpb":	'e',
+	"rsp":	'f'
+}
+
 def instr_Jmp(instruction, pointers, fo):
 	top_byte = "0d"
 	if len(instruction) < 4:
@@ -53,15 +72,15 @@ def instr_Inc(instruction, pointers, fo):
 	elif instruction[3][0] != 'r':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "register reference")
 		return
-	if int(instruction[2][1:]) >= 16 or int(instruction[2][1:]) < 0:
+	topmid_byte_top_nibble = registers.get([instruction[2], None)
+	if topmid_byte == None:
 		CustomError.ERR_invalidValue(instruction[-1], '1')
 		return
-	elif int(instruction[3][1:]) >= 16 or int(instruction[3][1:]) < 0:
+	botmid_byte_top_nibble = registers.get(instruction[3], None)
+	if botmid_byte == None:
 		CustomError.ERR_invalidValue(instruction[-1], '2')
 		return
-	topmid_byte = ".1x"%(int(instruction[2][1:])) + '0'
-	botmid_byte = ".1x"%(int(instruction[2][1:])) + '0'
-	fo.write(top_byte, topmid_byte, botmid_byte, "00")
+	fo.write(top_byte, topmid_byte_top_nibble, '0' botmid_byte_top_nibble, "000")
 	
 	
 def instr_Dec(instruction, pointers, fo):
