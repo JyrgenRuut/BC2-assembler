@@ -37,6 +37,56 @@ registers = {
 	"rsp":	'f'
 }
 
+def writeAndRead1Instruction(instruction, pointers, fo, opcode):
+	top_byte = opcode
+	if len(instruction) < 4:
+		if len(instruction) < 3:
+			CustomError.ERR_missingArgument(instruction[-1], '1')
+			return 0
+		CustomError.ERR_missingArgument(instruction[-1], '2')
+		return 0
+	if instruction[1][0] != 'r':
+		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
+		return 0
+	elif instruction[2][0] != 'r':
+		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "register reference")
+		return 0
+	topmid_byte_top_nibble = registers.get(instruction[1], None)
+	if topmid_byte_top_nibble == None:
+		CustomError.ERR_invalidValue(instruction[-1], '1')
+		return 0
+	botmid_byte_top_nibble = registers.get(instruction[2], None)
+	if botmid_byte_top_nibble == None:
+		CustomError.ERR_invalidValue(instruction[-1], '2')
+		return 0
+	fo.write("{}{}{} {}{}".format(top_byte, topmid_byte_top_nibble, '0', botmid_byte_top_nibble, "000"))
+	return 1
+
+def writeAndRead2Instruction(instruction, pointers, fo, opcode):
+	top_byte = opcode
+	if len(instruction) < 4:
+		if len(instruction) < 3:
+			CustomError.ERR_missingArgument(instruction[-1], '1')
+			return 0
+		CustomError.ERR_missingArgument(instruction[-1], '2')
+		return 0
+	if instruction[1][0] != 'r':
+		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
+		return 0
+	elif instruction[2][0] != 'r':
+		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "register reference")
+		return 0
+	topmid_byte_top_nibble = registers.get(instruction[1], None)
+	if topmid_byte_top_nibble == None:
+		CustomError.ERR_invalidValue(instruction[-1], '1')
+		return 0
+	topmid_byte_bottom_nibble = registers.get(instruction[2], None)
+	if topmid_byte_bottom_nibble == None:
+		CustomError.ERR_invalidValue(instruction[-1], '2')
+		return 0
+	fo.write("{}{}{} {}".format(top_byte, topmid_byte_top_nibble, topmid_byte_bottom_nibble, "0000"))
+	return 1
+
 def instr_Jmp(instruction, pointers, fo):
 	top_byte = "0d"
 	if len(instruction) < 4:
@@ -64,56 +114,10 @@ def instr_Jmp(instruction, pointers, fo):
 	return 1
 
 def instr_Inc(instruction, pointers, fo):
-	top_byte = "17"
-	if len(instruction) < 4:
-		if len(instruction) < 3:
-			CustomError.ERR_missingArgument(instruction[-1], '1')
-			return 0
-		CustomError.ERR_missingArgument(instruction[-1], '2')
-		return 0
-	if instruction[1][0] != 'r':
-		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
-		return 0
-	elif instruction[2][0] != 'r':
-		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "register reference")
-		return 0
-	topmid_byte_top_nibble = registers.get(instruction[1], None)
-	if topmid_byte_top_nibble == None:
-		CustomError.ERR_invalidValue(instruction[-1], '1')
-		return 0
-	botmid_byte_top_nibble = registers.get(instruction[2], None)
-	if botmid_byte_top_nibble == None:
-		CustomError.ERR_invalidValue(instruction[-1], '2')
-		return 0
-	fo.write("{}{}{} {}{}".format(top_byte, topmid_byte_top_nibble, '0', botmid_byte_top_nibble, "000"))
-	return 1
-	
+	return writeAndRead1Instruction(instruction, pointers, fo, "17")
 	
 def instr_Dec(instruction, pointers, fo):
-	top_byte = "18"
-	if len(instruction) < 4:
-		if len(instruction) < 3:
-			CustomError.ERR_missingArgument(instruction[-1], '1')
-			return 0
-		CustomError.ERR_missingArgument(instruction[-1], '2')
-		return 0
-	if instruction[1][0] != 'r':
-		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
-		return 0
-	elif instruction[2][0] != 'r':
-		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "register reference")
-		return 0
-	topmid_byte_top_nibble = registers.get(instruction[2], None)
-	if topmid_byte_top_nibble == None:
-		CustomError.ERR_invalidValue(instruction[-1], '1')
-		return 0
-	botmid_byte_top_nibble = registers.get(instruction[3], None)
-	if botmid_byte_top_nibble == None:
-		CustomError.ERR_invalidValue(instruction[-1], '2')
-		return 0
-	fo.write("{}{}{} {}{}".format(top_byte, topmid_byte_top_nibble, '0', botmid_byte_top_nibble, "000"))
-	return 1
-
+	return writeAndRead1Instruction(instruction, pointers, fo, "18")
 
 def instr_Push(instruction, pointers, fo):
 	print(instruction)
@@ -122,7 +126,9 @@ def instr_Pop(instruction, pointers, fo):
 def instr_Call(instruction, pointers, fo):
 	print(instruction)
 def instr_Ret(instruction, pointers, fo):
-	print(instruction)
+	fo.write("0f0e f000")
+	return 1
+
 def instr_Mov(instruction, pointers, fo):
 	top_byte = "00"
 	if len(instruction) < 4:
@@ -186,15 +192,20 @@ def instr_Save(instruction, pointers, fo):
 def instr_Load(instruction, pointers, fo):
 	print(instruction)
 def instr_Rsf(instruction, pointers, fo):
-	print(instruction)
+	return writeAndRead1Instruction(instruction, pointers, fo, "09")
+
 def instr_Lsf(instruction, pointers, fo):
-	print(instruction)
+	return writeAndRead1Instruction(instruction, pointers, fo, "0a")
+
 def instr_Ars(instruction, pointers, fo):
-	print(instruction)
+	return writeAndRead1Instruction(instruction, pointers, fo, "0b")
+
 def instr_Neg(instruction, pointers, fo):
-	print(instruction)
+	return writeAndRead2Instruction(instruction, pointers, fo, "0c")
+
 def instr_Not(instruction, pointers, fo):
-	print(instruction)
+	return writeAndRead2Instruction(instruction, pointers, fo, "08")
+
 def instr_Pushf(instruction, pointers, fo):
 	print(instruction)
 def instr_Popf(instruction, pointers, fo):
@@ -205,37 +216,37 @@ def instr_Tst(instruction, pointers, fo):
 	print(instruction)
 def instr_Nop(instruction, pointers, fo):
 	fo.write("0000 0000")
-	
-instructions_repository = {
-	"jmp": instr_Jmp,
-	"inc": instr_Inc,
-	"dec": instr_Dec,
-	"push": instr_Push,
-	"pop": instr_Pop,
-	"call": instr_Call,
-	"ret": instr_Ret,
-	"mov": instr_Mov,
-	"add": instr_Add,
-	"addc": instr_Addc,
-	"sub": instr_Sub,
-	"subb": instr_Subb,
-	"xor": instr_Xor,
-	"and": instr_And,
-	"or": instr_Or,
-	"save": instr_Save,
-	"load": instr_Load,
-	"rsf": instr_Rsf,
-	"lsf": instr_Lsf,
-	"ars": instr_Ars,
-	"neg": instr_Neg,
-	"not": instr_Not,
-	"pushf": instr_Pushf,
-	"popf": instr_Popf,
-	"int": instr_Int,
-	"tst": instr_Tst,
-	"nop": instr_Nop
-}
+	return 1
 
+instructions_repository = {
+	"jmp":	instr_Jmp,
+	"inc":	instr_Inc,
+	"dec":	instr_Dec,
+	"push":	instr_Push,
+	"pop":	instr_Pop,
+	"call":	instr_Call,
+	"ret":	instr_Ret,
+	"mov":	instr_Mov,
+	"add":	instr_Add,
+	"addc":	instr_Addc,
+	"sub":	instr_Sub,
+	"subb":	instr_Subb,
+	"xor":	instr_Xor,
+	"and":	instr_And,
+	"or":	instr_Or,
+	"save":	instr_Save,
+	"load":	instr_Load,
+	"rsf":	instr_Rsf,
+	"lsf":	instr_Lsf,
+	"ars":	instr_Ars,
+	"neg":	instr_Neg,
+	"not":	instr_Not,
+	"pushf":instr_Pushf,
+	"popf":	instr_Popf,
+	"int":	instr_Int,
+	"tst":	instr_Tst,
+	"nop":	instr_Nop
+}
 
 def resolveInstruction(instruction, pointers, fo):
 	return instructions_repository[instruction[0]](instruction, pointers, fo)
