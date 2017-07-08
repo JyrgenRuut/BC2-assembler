@@ -1,20 +1,23 @@
 import sys
 import BC2parser
+import BC2instructions
 
 #assembly_file, output_file = sys.argv[1], sys.arv[2]
 
-fi = []
+input_file = []
 instructions = []
 pointers = {}
 
-inputFile = open("input.txt", "r")
-temp = inputFile.readlines()
+fi = open("input.txt", "r")
+temp = fi.readlines()
 for line in temp:
-	fi.append(line.split())
+	input_file.append(line.split())
 
-BC2parser.parseAssembly(fi, instructions, pointers)
+BC2parser.parseAssembly(input_file, instructions, pointers)
+fi.close()
 
-print(instructions)
-print(pointers)
+fo = open("Output.txt", "w")
 
+for instruction in instructions:
+	BC2instructions.resolveInstruction(instruction, pointers, fo)
 

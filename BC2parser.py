@@ -7,11 +7,12 @@ def parseAssembly(fi, instructions, pointers):
 		if instruction[0][0] == '*':
 			reference = '&' + instruction[0][1:]
 			if reference in pointers:
-				print("Error at line: ", true_counter + 1, "; Label already defined.")
+				CustomError.ERR_labelMissing(true_counter + 1)
 			else:
 				pointers.update({reference:counter})
 				counter -= 1
 		else:
+			instruction.append(true_counter)
 			instructions.append(instruction)
 		true_counter += 1
 		counter += 1
