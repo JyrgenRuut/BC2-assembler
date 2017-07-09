@@ -234,10 +234,9 @@ def instr_Mov(instruction, pointers, fo, assembly_failed):
 				fo.write("{}{}{} {}".format("00", topmid_byte_top_nibble, '0', "%4.4x"%(int(instruction[2][1:]))))
 			return True
 	elif len(instruction[2]) == 5 and instruction[2][0] == 'h':
-		bottom_bytes = []
 		for c in instruction[2][1:]:
 			if '0' <= c <= '9' or 'a' <= c <= 'f':
-				bottom_bytes.append(c)
+				continue
 			else:
 				CustomError.ERR_invalidValue(instruction[-1], '2')
 				return False
@@ -314,10 +313,9 @@ def instr_Int(instruction, pointers, fo, assembly_failed):
 				fo.write("{}{}{}".format("14", "0e f0", "%2.2x"%temp))
 			return True
 	elif len(instruction[1]) == 3 and instruction[1][0] == 'h':
-		bottom_byte = []
 		for c in instruction[1][1:]:
 			if '0' <= c <= '9' or 'a' <= c <= 'f':
-				bottom_byte.append(c)
+				continue
 			else:
 				CustomError.ERR_invalidValue(instruction[-1], '1')
 				return False
