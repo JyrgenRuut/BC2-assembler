@@ -62,7 +62,7 @@ def threeRegFieldInstruction(instruction, pointers, fo, opcode):
 	if topmid_byte_top_nibble == None:
 		CustomError.ERR_invalidValue(instruction[-1], '1')
 		return 0
-	topmid_byte_bottom_nibble = register.get(instruction[2], None)
+	topmid_byte_bottom_nibble = registers.get(instruction[2], None)
 	if topmid_byte_bottom_nibble == None:
 		CustomError.ERR_invalidValue(instruction[-1], '2')
 		return 0
@@ -131,7 +131,7 @@ def writeFieldWithStackInstruction(instruction, pointers, fo, opcode):
 		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
 		return 0
 	topmid_byte_top_nibble = registers.get(instruction[1], None)
-	if temp == None:
+	if topmid_byte_top_nibble == None:
 		CustomError.ERR_invalidValue(instruction[-1], '1')
 		return 0
 	fo.write("{}{}{}".format(opcode, topmid_byte_top_nibble, "e f000"))
@@ -218,11 +218,11 @@ def instr_Mov(instruction, pointers, fo):
 		fo.write("{}{}{} {}".format("00", topmid_byte_top_nibble, topmid_byte_bottom_nibble, "0000"))
 		return 1
 	elif instruction[2][0] == 'd':
-		if -32768 > int(instruction[3][1:]) > 32767:
+		if -32768 > int(instruction[2][1:]) > 32767:
 			CustomError.ERR_invalidValue(instruction[-1], '2')
 			return 0
 		else:
-			fo.write("{}{}{} {}".format("00", topmid_byte_top_nibble, '0', "%4.4x"%(int(instruction[3][1:]))))
+			fo.write("{}{}{} {}".format("00", topmid_byte_top_nibble, '0', "%4.4x"%(int(instruction[2][1:]))))
 			return 1
 	elif len(instruction[2]) == 5 and instruction[2][0] == 'h':
 		bottom_bytes = []
@@ -315,7 +315,29 @@ def instr_Int(instruction, pointers, fo):
 		return 0
 
 def instr_Tst(instruction, pointers, fo):
-	print(instruction)
+	if len(instruction) < 4:
+		if len(instruction) < 3:
+			CustomError.ERR_missingArgument(instruction[-1], '1')
+			return 0
+		CustomError.ERR_missingArgument(instruction[-1], '2')
+		return 0
+	if instruction[1][0] != 'r':
+		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
+		return 0
+	elif instruction[2][0] != 'r':
+		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "register reference")
+		return 0
+	topmid_byte_bottom_nibble = registers.get(instruction[1], None)
+	if topmid_byte_bottom_nibble == None:
+		CustomError.ERR_invalidValue(instruction[-1], '1')
+		return 0
+	botmid_byte_top_nibble = registers.get(instruction[2], None)
+	if botmid_byte_top_nibble == None:
+		CustomError.ERR_invalidValue(instruction[-1], '2')
+		return 0
+	fo.write("{}{} {}{}".format("190", topmid_byte_bottom_nibble, botmid_byte_top_nibble, "000"))
+	return 1
+
 def instr_Nop(instruction, pointers, fo):
 	fo.write("0000 0000")
 	return 1
