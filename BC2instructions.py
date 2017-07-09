@@ -281,15 +281,39 @@ def instr_Not(instruction, pointers, fo):
 	return writeAndRead2Instruction(instruction, pointers, fo, "08")
 
 def instr_Pushf(instruction, pointers, fo):
-	fo.write("1200 0000")
+	fo.write("120e f000")
 	return 1
 
 def instr_Popf(instruction, pointers, fo):
-	fo.write("1300 0000")
+	fo.write("130e f000")
 	return 1
 
 def instr_Int(instruction, pointers, fo):
-	print(instruction)
+	if len(instruction) < 3:
+		CustomError.ERR_missingArgument(instruction[-1], '1')
+		return 0
+	if instruction[1][0] == 'd':
+		temp = int(instruction[1][1:])
+		if 0 > temp > 255:
+			CustomError.ERR_invalidValue(instruction[-1], '1')
+			return 0
+		else:
+			fo.write("{}{}{}".format("14", "0e f0", "%2.2x"%temp))
+			return 1
+	elif len(instruction[1]) == 3 and instruction[1][0] == 'h':
+		bottom_byte = []
+		for c in instruction[1][1:]:
+			if '0' <= c <= '9' or 'a' <= c <= 'f':
+				bottom_byte.append(c)
+			else:
+				CustomError.ERR_invalidValue(instruction[-1], '1')
+				return 0
+		fo.write("{}{}{}".format("14", "0e f0", instruction[1][1:]))
+		return 1
+	else:
+		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "d (decimal), h (hexadecimal)")
+		return 0
+
 def instr_Tst(instruction, pointers, fo):
 	print(instruction)
 def instr_Nop(instruction, pointers, fo):

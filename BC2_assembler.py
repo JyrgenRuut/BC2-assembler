@@ -29,7 +29,7 @@ for instruction in instructions:
 	if counter % 4 == 0:
 		fo.write("\n")
 	else:
-		fo.write(' ')
+		fo.write('\t')
 
 if assembly_failed == 1:
 	fo.close()

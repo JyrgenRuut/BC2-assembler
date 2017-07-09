@@ -5,6 +5,8 @@ def parseAssembly(fi, instructions, pointers):
 	true_counter = 0;
 	
 	for instruction in fi:
+		if not instruction:
+			continue
 		if instruction[0][0] == '*':
 			reference = '&' + instruction[0][1:]
 			if reference in pointers:
