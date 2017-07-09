@@ -3,7 +3,7 @@ import BC2parser
 import BC2instructions
 import CustomError
 
-#assembly_file, output_file = sys.argv[1], sys.arv[2]
+#sys.argv[1], sys.argv[2]
 
 input_file = []
 instructions = []
@@ -16,11 +16,14 @@ temp = fi.readlines()
 for line in temp:
 	input_file.append(line.split())
 
+#run through the source file and split it up to lines of code with each word being a "statement". said words are also used as tokens for later logic
 BC2parser.parseAssembly(input_file, instructions, pointers)
 fi.close()
 
 fo = open("Output.txt", "w")
 
+#loop that tries to assemble the source file into "machine code" (though it is in text form, reason being, that's what "Logisim" accepts as input)
+#the assembly process will run through the whole file to catch all errors but will only write to an output until no errors have been found
 for instruction in instructions:
 	wasResolved = BC2instructions.resolveInstruction(instruction, pointers, fo, assembly_failed)
 	if wasResolved == False:
