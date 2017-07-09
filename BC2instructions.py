@@ -123,8 +123,21 @@ def writeAndRead2Instruction(instruction, pointers, fo, opcode):
 	fo.write("{}{}{} {}".format(top_byte, topmid_byte_top_nibble, topmid_byte_bottom_nibble, "0000"))
 	return 1
 
+def writeFieldWithStackInstruction(instruction, pointers, fo, opcode):
+	if len(instruction) < 3:
+		CustomError.ERR_missingArgument(instruction[-1], '1')
+		return 0
+	if instruction[1][0] != 'r':
+		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
+		return 0
+	topmid_byte_top_nibble = registers.get(instruction[1], None)
+	if temp == None:
+		CustomError.ERR_invalidValue(instruction[-1], '1')
+		return 0
+	fo.write("{}{}{}".format(opcode, topmid_byte_top_nibble, "e f000"))
+	return 1
+
 def instr_Jmp(instruction, pointers, fo):
-	top_byte = "0d"
 	if len(instruction) < 4:
 		if len(instruction) < 3:
 			CustomError.ERR_missingArgument(instruction[-1], '1')
@@ -146,7 +159,7 @@ def instr_Jmp(instruction, pointers, fo):
 	if low_bytes > 65535:
 		CustomError.ERR_outOfBounds(instruction[-1])
 		return 0
-	fo.write("{}{}{} {}".format(top_byte, '0', topmid_byte_bottom_nibble,"%.4x"%(low_bytes)))
+	fo.write("{}{} {}".format("0d0", topmid_byte_bottom_nibble,"%.4x"%(low_bytes)))
 	return 1
 
 def instr_Inc(instruction, pointers, fo):
@@ -156,18 +169,19 @@ def instr_Dec(instruction, pointers, fo):
 	return writeAndRead1Instruction(instruction, pointers, fo, "18")
 
 def instr_Push(instruction, pointers, fo):
-	print(instruction)
+	return writeFieldWithStackInstruction(instruction, pointers, fo, "10")
+
 def instr_Pop(instruction, pointers, fo):
-	print(instruction)
+	return writeFieldWithStackInstruction(instruction, pointers, fo, "11")
+
 def instr_Call(instruction, pointers, fo):
-	top byte = "0e"
 	if len(instruction) < 3:
 		CustomError.ERR_missingArgument(instruction[-1], '1')
 		return 0
 	if instruction[1][0] != '&':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "label reference")
 		return 0
-	temp = pointers.get(instruction[2], None)
+	temp = pointers.get(instruction[1], None)
 	if temp == None:
 		CustomError.ERR_labelMissing(instruction[-1])
 		return 0
@@ -175,7 +189,7 @@ def instr_Call(instruction, pointers, fo):
 	if low_bytes > 65535:
 		CustomError.ERR_outOfBounds(instruction[-1])
 		return 0
-	fo.write("{}{} {}".format(top_byte, "fe", "%.4x"%(low_bytes)))
+	fo.write("{} {}".format("0efe", "%.4x"%(low_bytes)))
 	return 1
 
 def instr_Ret(instruction, pointers, fo):
@@ -183,7 +197,6 @@ def instr_Ret(instruction, pointers, fo):
 	return 1
 
 def instr_Mov(instruction, pointers, fo):
-	top_byte = "00"
 	if len(instruction) < 4:
 		if len(instruction) < 3:
 			CustomError.ERR_missingArgument(instruction[-1], '1')
@@ -202,14 +215,14 @@ def instr_Mov(instruction, pointers, fo):
 		if topmid_bottom_nibble == None:
 			CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
 			return 0
-		fo.write("{}{}{} {}".format(top_byte, topmid_byte_top_nibble, topmid_byte_bottom_nibble, "0000"))
+		fo.write("{}{}{} {}".format("00", topmid_byte_top_nibble, topmid_byte_bottom_nibble, "0000"))
 		return 1
 	elif instruction[2][0] == 'd':
 		if -32768 > int(instruction[3][1:]) > 32767:
 			CustomError.ERR_invalidValue(instruction[-1], '2')
 			return 0
 		else:
-			fo.write("{}{}{} {}".format(top_byte, topmid_byte_top_nibble, '0', "%4.4x"%(int(instruction[3][1:]))))
+			fo.write("{}{}{} {}".format("00", topmid_byte_top_nibble, '0', "%4.4x"%(int(instruction[3][1:]))))
 			return 1
 	elif len(instruction[2]) == 5 and instruction[2][0] == 'h':
 		bottom_bytes = []
@@ -219,7 +232,7 @@ def instr_Mov(instruction, pointers, fo):
 			else:
 				CustomError.ERR_invalidValue(instruction[-1], '2')
 				return 0
-		fo.write("{}{}{} {}".format(top_byte, topmid_byte_top_nibble, '0', instruction[2][1:]))
+		fo.write("{}{}{} {}".format("00", topmid_byte_top_nibble, '0', instruction[2][1:]))
 		return 1
 	else:
 		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "d (decimal), h (hexadecimal) or r (register reference)")
@@ -247,9 +260,11 @@ def instr_Or(instruction, pointers, fo):
 	return threeRegFieldInstruction(instruction,pointers, fo, "07")
 
 def instr_Save(instruction, pointers, fo):
-	print(instruction)
+	return writeFieldWithStackInstruction(instruction, pointers, fo, "15")
+
 def instr_Load(instruction, pointers, fo):
-	print(instruction)
+	return writeFieldWithStackInstruction(instruction, pointers, fo, "16")
+
 def instr_Rsf(instruction, pointers, fo):
 	return writeAndRead1Instruction(instruction, pointers, fo, "09")
 
@@ -266,9 +281,13 @@ def instr_Not(instruction, pointers, fo):
 	return writeAndRead2Instruction(instruction, pointers, fo, "08")
 
 def instr_Pushf(instruction, pointers, fo):
-	print(instruction)
+	fo.write("1200 0000")
+	return 1
+
 def instr_Popf(instruction, pointers, fo):
-	print(instruction)
+	fo.write("1300 0000")
+	return 1
+
 def instr_Int(instruction, pointers, fo):
 	print(instruction)
 def instr_Tst(instruction, pointers, fo):
