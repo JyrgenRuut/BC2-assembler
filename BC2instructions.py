@@ -136,7 +136,7 @@ def instr_Jmp(instruction, pointers, fo):
 		CustomError.ERR_invalidArgument(instruction[-1], '1')
 		return 0
 	if instruction[2][0] != '&':
-		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "reference")
+		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "label reference")
 		return 0
 	temp = pointers.get(instruction[2], None)
 	if temp == None:
@@ -160,7 +160,24 @@ def instr_Push(instruction, pointers, fo):
 def instr_Pop(instruction, pointers, fo):
 	print(instruction)
 def instr_Call(instruction, pointers, fo):
-	print(instruction)
+	top byte = "0e"
+	if len(instruction) < 3:
+		CustomError.ERR_missingArgument(instruction[-1], '1')
+		return 0
+	if instruction[1][0] != '&':
+		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "label reference")
+		return 0
+	temp = pointers.get(instruction[2], None)
+	if temp == None:
+		CustomError.ERR_labelMissing(instruction[-1])
+		return 0
+	low_bytes = int(temp) * 2
+	if low_bytes > 65535:
+		CustomError.ERR_outOfBounds(instruction[-1])
+		return 0
+	fo.write("{}{} {}".format(top_byte, "fe", "%.4x"%(low_bytes)))
+	return 1
+
 def instr_Ret(instruction, pointers, fo):
 	fo.write("0f0e f000")
 	return 1
