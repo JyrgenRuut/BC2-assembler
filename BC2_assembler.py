@@ -11,12 +11,11 @@ pointers = {}
 assembly_failed = 0
 counter = 0
 
+#run through the source file and split it up to lines of code with each word being a "statement". said words are also used as tokens for later logic
 fi = open("input.txt", "r")
 temp = fi.readlines()
 for line in temp:
 	input_file.append(line.split())
-
-#run through the source file and split it up to lines of code with each word being a "statement". said words are also used as tokens for later logic
 BC2parser.parseAssembly(input_file, instructions, pointers)
 fi.close()
 
