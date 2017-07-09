@@ -37,193 +37,202 @@ registers = {
 	"rsp":	'f'
 }
 
-def threeRegFieldInstruction(instruction, pointers, fo, opcode):
+def threeRegFieldInstruction(instruction, pointers, fo, opcode, assembly_failed):
 	top_byte = opcode
 	instruction_length = len(instruction)
 	if instruction_length < 5:
 		if instruction_length < 4:
 			if instruction_lenth < 3:
 				CustomError.ERR_missingArgument(instruction[-1], '1')
-				return 0
+				return False
 			CustomError.ERR_missingArgument(instruction[-1], '2')
-			return 0
+			return False
 		CustomError.ERR_missingArgument(instruction[-1], '3')
-		return 0
+		return False
 	if instruction[1][0] != 'r':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
-		return 0
+		return False
 	elif instruction[2][0] != 'r':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "register reference")
-		return 0
+		return False
 	elif instruction[3][0] != 'r':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '3', "register reference")
-		return 0
+		return False
 	topmid_byte_top_nibble = registers.get(instruction[1], None)
 	if topmid_byte_top_nibble == None:
 		CustomError.ERR_invalidValue(instruction[-1], '1')
-		return 0
+		return False
 	topmid_byte_bottom_nibble = registers.get(instruction[2], None)
 	if topmid_byte_bottom_nibble == None:
 		CustomError.ERR_invalidValue(instruction[-1], '2')
-		return 0
+		return False
 	botmid_byte_top_nibble = registers.get(instruction[3], None)
 	if botmid_byte_top_nibble == None:
 		CustomError.ERR_invalidValue(instruction[-1], '3')
-		return 0
-	fo.write("{}{}{} {}{}".format(top_byte, topmid_byte_top_nibble, topmid_byte_bottom_nibble, botmid_byte_top_nibble, "000"))
-	return 1
+		return False
+	if not assembly_failed:
+		fo.write("{}{}{} {}{}".format(top_byte, topmid_byte_top_nibble, topmid_byte_bottom_nibble, botmid_byte_top_nibble, "000"))
+	return True
 
-def writeAndRead1Instruction(instruction, pointers, fo, opcode):
+def writeAndRead1Instruction(instruction, pointers, fo, opcode, assembly_failed):
 	top_byte = opcode
 	if len(instruction) < 4:
 		if len(instruction) < 3:
 			CustomError.ERR_missingArgument(instruction[-1], '1')
-			return 0
+			return False
 		CustomError.ERR_missingArgument(instruction[-1], '2')
-		return 0
+		return False
 	if instruction[1][0] != 'r':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
-		return 0
+		return False
 	elif instruction[2][0] != 'r':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "register reference")
-		return 0
+		return False
 	topmid_byte_top_nibble = registers.get(instruction[1], None)
 	if topmid_byte_top_nibble == None:
 		CustomError.ERR_invalidValue(instruction[-1], '1')
-		return 0
+		return False
 	botmid_byte_top_nibble = registers.get(instruction[2], None)
 	if botmid_byte_top_nibble == None:
 		CustomError.ERR_invalidValue(instruction[-1], '2')
-		return 0
-	fo.write("{}{}{} {}{}".format(top_byte, topmid_byte_top_nibble, '0', botmid_byte_top_nibble, "000"))
-	return 1
+		return False
+	if not assembly_failed:
+		fo.write("{}{}{} {}{}".format(top_byte, topmid_byte_top_nibble, '0', botmid_byte_top_nibble, "000"))
+	return True
 
-def writeAndRead2Instruction(instruction, pointers, fo, opcode):
+def writeAndRead2Instruction(instruction, pointers, fo, opcode, assembly_failed):
 	top_byte = opcode
 	if len(instruction) < 4:
 		if len(instruction) < 3:
 			CustomError.ERR_missingArgument(instruction[-1], '1')
-			return 0
+			return False
 		CustomError.ERR_missingArgument(instruction[-1], '2')
-		return 0
+		return False
 	if instruction[1][0] != 'r':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
-		return 0
+		return False
 	elif instruction[2][0] != 'r':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "register reference")
-		return 0
+		return False
 	topmid_byte_top_nibble = registers.get(instruction[1], None)
 	if topmid_byte_top_nibble == None:
 		CustomError.ERR_invalidValue(instruction[-1], '1')
-		return 0
+		return False
 	topmid_byte_bottom_nibble = registers.get(instruction[2], None)
 	if topmid_byte_bottom_nibble == None:
 		CustomError.ERR_invalidValue(instruction[-1], '2')
-		return 0
-	fo.write("{}{}{} {}".format(top_byte, topmid_byte_top_nibble, topmid_byte_bottom_nibble, "0000"))
-	return 1
+		return False
+	if not assembly_failed:
+		fo.write("{}{}{} {}".format(top_byte, topmid_byte_top_nibble, topmid_byte_bottom_nibble, "0000"))
+	return True
 
-def writeFieldWithStackInstruction(instruction, pointers, fo, opcode):
+def writeFieldWithStackInstruction(instruction, pointers, fo, opcode, assembly_failed):
 	if len(instruction) < 3:
 		CustomError.ERR_missingArgument(instruction[-1], '1')
-		return 0
+		return False
 	if instruction[1][0] != 'r':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
-		return 0
+		return False
 	topmid_byte_top_nibble = registers.get(instruction[1], None)
 	if topmid_byte_top_nibble == None:
 		CustomError.ERR_invalidValue(instruction[-1], '1')
-		return 0
-	fo.write("{}{}{}".format(opcode, topmid_byte_top_nibble, "e f000"))
-	return 1
+		return False
+	if not assembly_failed:
+		fo.write("{}{}{}".format(opcode, topmid_byte_top_nibble, "e f000"))
+	return True
 
-def instr_Jmp(instruction, pointers, fo):
+def instr_Jmp(instruction, pointers, fo, assembly_failed):
 	if len(instruction) < 4:
 		if len(instruction) < 3:
 			CustomError.ERR_missingArgument(instruction[-1], '1')
-			return 1
+			return False
 		CustomError.ERR_missingArgument(instruction[-1], '2')
-		return 0
+		return False
 	topmid_byte_bottom_nibble = jump_flags.get(instruction[1], None)
 	if topmid_byte_bottom_nibble == None:
 		CustomError.ERR_invalidArgument(instruction[-1], '1')
-		return 0
+		return False
 	if instruction[2][0] != '&':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "label reference")
-		return 0
+		return False
 	temp = pointers.get(instruction[2], None)
 	if temp == None:
 		CustomError.ERR_labelMissing(instruction[-1])
-		return 0
+		return False
 	low_bytes = int(temp) * 2
 	if low_bytes > 65535:
 		CustomError.ERR_outOfBounds(instruction[-1])
-		return 0
-	fo.write("{}{} {}".format("0d0", topmid_byte_bottom_nibble,"%.4x"%(low_bytes)))
-	return 1
+		return False
+	if not assembly_failed:
+		fo.write("{}{} {}".format("0d0", topmid_byte_bottom_nibble,"%.4x"%(low_bytes)))
+	return True
 
-def instr_Inc(instruction, pointers, fo):
-	return writeAndRead1Instruction(instruction, pointers, fo, "17")
+def instr_Inc(instruction, pointers, fo, assembly_failed):
+	return writeAndRead1Instruction(instruction, pointers, fo, "17", assembly_failed)
 	
-def instr_Dec(instruction, pointers, fo):
-	return writeAndRead1Instruction(instruction, pointers, fo, "18")
+def instr_Dec(instruction, pointers, fo, assembly_failed):
+	return writeAndRead1Instruction(instruction, pointers, fo, "18", assembly_failed)
 
-def instr_Push(instruction, pointers, fo):
-	return writeFieldWithStackInstruction(instruction, pointers, fo, "10")
+def instr_Push(instruction, pointers, fo, assembly_failed):
+	return writeFieldWithStackInstruction(instruction, pointers, fo, "10", assembly_failed)
 
-def instr_Pop(instruction, pointers, fo):
-	return writeFieldWithStackInstruction(instruction, pointers, fo, "11")
+def instr_Pop(instruction, pointers, fo, assembly_failed):
+	return writeFieldWithStackInstruction(instruction, pointers, fo, "11", assembly_failed)
 
-def instr_Call(instruction, pointers, fo):
+def instr_Call(instruction, pointers, fo, assembly_failed):
 	if len(instruction) < 3:
 		CustomError.ERR_missingArgument(instruction[-1], '1')
-		return 0
+		return False
 	if instruction[1][0] != '&':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "label reference")
-		return 0
+		return False
 	temp = pointers.get(instruction[1], None)
 	if temp == None:
 		CustomError.ERR_labelMissing(instruction[-1])
-		return 0
+		return False
 	low_bytes = int(temp) * 2
 	if low_bytes > 65535:
 		CustomError.ERR_outOfBounds(instruction[-1])
-		return 0
-	fo.write("{} {}".format("0efe", "%.4x"%(low_bytes)))
-	return 1
+		return False
+	if not assembly_failed:
+		fo.write("{} {}".format("0efe", "%.4x"%(low_bytes)))
+	return True
 
-def instr_Ret(instruction, pointers, fo):
-	fo.write("0f0e f000")
-	return 1
+def instr_Ret(instruction, pointers, fo, assembly_failed):
+	if not assembly_failed:
+		fo.write("0f0e f000")
+	return True
 
-def instr_Mov(instruction, pointers, fo):
+def instr_Mov(instruction, pointers, fo, assembly_failed):
 	if len(instruction) < 4:
 		if len(instruction) < 3:
 			CustomError.ERR_missingArgument(instruction[-1], '1')
-			return 0
+			return False
 		CustomError.ERR_missingArgument(instruction[-1], '2')
-		return 0
+		return False
 	if instruction[1][0] != 'r':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
-		return 0
+		return False
 	topmid_byte_top_nibble = registers.get(instruction[1], None)
 	if topmid_byte_top_nibble == None:
 		CustomError.ERR_invalidValue(instruction[-1], '1')
-		return 0
+		return False
 	if instruction[2][0] == 'r':
 		topmid_bottom_nibble = registers.get(instruction[2], None)
 		if topmid_bottom_nibble == None:
 			CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
-			return 0
-		fo.write("{}{}{} {}".format("00", topmid_byte_top_nibble, topmid_byte_bottom_nibble, "0000"))
-		return 1
+			return False
+		if not assembly_failed:
+			fo.write("{}{}{} {}".format("00", topmid_byte_top_nibble, topmid_byte_bottom_nibble, "0000"))
+		return True
 	elif instruction[2][0] == 'd':
 		if -32768 > int(instruction[2][1:]) > 32767:
 			CustomError.ERR_invalidValue(instruction[-1], '2')
-			return 0
+			return False
 		else:
-			fo.write("{}{}{} {}".format("00", topmid_byte_top_nibble, '0', "%4.4x"%(int(instruction[2][1:]))))
-			return 1
+			if not assembly_failed:
+				fo.write("{}{}{} {}".format("00", topmid_byte_top_nibble, '0', "%4.4x"%(int(instruction[2][1:]))))
+			return True
 	elif len(instruction[2]) == 5 and instruction[2][0] == 'h':
 		bottom_bytes = []
 		for c in instruction[2][1:]:
@@ -231,75 +240,79 @@ def instr_Mov(instruction, pointers, fo):
 				bottom_bytes.append(c)
 			else:
 				CustomError.ERR_invalidValue(instruction[-1], '2')
-				return 0
-		fo.write("{}{}{} {}".format("00", topmid_byte_top_nibble, '0', instruction[2][1:]))
-		return 1
+				return False
+		if not assembly_failed:
+			fo.write("{}{}{} {}".format("00", topmid_byte_top_nibble, '0', instruction[2][1:]))
+		return True
 	else:
 		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "d (decimal), h (hexadecimal) or r (register reference)")
-		return 0
+		return False
 
-def instr_Add(instruction, pointers, fo):
-	return threeRegFieldInstruction(instruction,pointers, fo, "01")
+def instr_Add(instruction, pointers, fo, assembly_failed):
+	return threeRegFieldInstruction(instruction,pointers, fo, "01", assembly_failed)
 
-def instr_Addc(instruction, pointers, fo):
-	return threeRegFieldInstruction(instruction,pointers, fo, "02")
+def instr_Addc(instruction, pointers, fo, assembly_failed):
+	return threeRegFieldInstruction(instruction,pointers, fo, "02", assembly_failed)
 
-def instr_Sub(instruction, pointers, fo):
-	return threeRegFieldInstruction(instruction,pointers, fo, "03")
+def instr_Sub(instruction, pointers, fo, assembly_failed):
+	return threeRegFieldInstruction(instruction,pointers, fo, "03", assembly_failed)
 
-def instr_Subb(instruction, pointers, fo):
-	return threeRegFieldInstruction(instruction,pointers, fo, "04")
+def instr_Subb(instruction, pointers, fo, assembly_failed):
+	return threeRegFieldInstruction(instruction,pointers, fo, "04", assembly_failed)
 
-def instr_Xor(instruction, pointers, fo):
-	return threeRegFieldInstruction(instruction,pointers, fo, "05")
+def instr_Xor(instruction, pointers, fo, assembly_failed):
+	return threeRegFieldInstruction(instruction,pointers, fo, "05", assembly_failed)
 
-def instr_And(instruction, pointers, fo):
-	return threeRegFieldInstruction(instruction,pointers, fo, "06")
+def instr_And(instruction, pointers, fo, assembly_failed):
+	return threeRegFieldInstruction(instruction,pointers, fo, "06", assembly_failed)
 
-def instr_Or(instruction, pointers, fo):
-	return threeRegFieldInstruction(instruction,pointers, fo, "07")
+def instr_Or(instruction, pointers, fo, assembly_failed):
+	return threeRegFieldInstruction(instruction,pointers, fo, "07", assembly_failed)
 
-def instr_Save(instruction, pointers, fo):
-	return writeFieldWithStackInstruction(instruction, pointers, fo, "15")
+def instr_Save(instruction, pointers, fo, assembly_failed):
+	return writeFieldWithStackInstruction(instruction, pointers, fo, "15", assembly_failed)
 
-def instr_Load(instruction, pointers, fo):
-	return writeFieldWithStackInstruction(instruction, pointers, fo, "16")
+def instr_Load(instruction, pointers, fo, assembly_failed):
+	return writeFieldWithStackInstruction(instruction, pointers, fo, "16", assembly_failed)
 
-def instr_Rsf(instruction, pointers, fo):
-	return writeAndRead1Instruction(instruction, pointers, fo, "09")
+def instr_Rsf(instruction, pointers, fo, assembly_failed):
+	return writeAndRead1Instruction(instruction, pointers, fo, "09", assembly_failed)
 
-def instr_Lsf(instruction, pointers, fo):
-	return writeAndRead1Instruction(instruction, pointers, fo, "0a")
+def instr_Lsf(instruction, pointers, fo, assembly_failed):
+	return writeAndRead1Instruction(instruction, pointers, fo, "0a", assembly_failed)
 
-def instr_Ars(instruction, pointers, fo):
-	return writeAndRead1Instruction(instruction, pointers, fo, "0b")
+def instr_Ars(instruction, pointers, fo, assembly_failed):
+	return writeAndRead1Instruction(instruction, pointers, fo, "0b", assembly_failed)
 
-def instr_Neg(instruction, pointers, fo):
-	return writeAndRead2Instruction(instruction, pointers, fo, "0c")
+def instr_Neg(instruction, pointers, fo, assembly_failed):
+	return writeAndRead2Instruction(instruction, pointers, fo, "0c", assembly_failed)
 
-def instr_Not(instruction, pointers, fo):
-	return writeAndRead2Instruction(instruction, pointers, fo, "08")
+def instr_Not(instruction, pointers, fo, assembly_failed):
+	return writeAndRead2Instruction(instruction, pointers, fo, "08", assembly_failed)
 
-def instr_Pushf(instruction, pointers, fo):
-	fo.write("120e f000")
-	return 1
+def instr_Pushf(instruction, pointers, fo, assembly_failed):
+	if not assembly_failed:
+		fo.write("120e f000")
+	return True
 
-def instr_Popf(instruction, pointers, fo):
-	fo.write("130e f000")
-	return 1
+def instr_Popf(instruction, pointers, fo, assembly_failed):
+	if not assembly_failed:
+		fo.write("130e f000")
+	return True
 
-def instr_Int(instruction, pointers, fo):
+def instr_Int(instruction, pointers, fo, assembly_failed):
 	if len(instruction) < 3:
 		CustomError.ERR_missingArgument(instruction[-1], '1')
-		return 0
+		return False
 	if instruction[1][0] == 'd':
 		temp = int(instruction[1][1:])
 		if 0 > temp > 255:
 			CustomError.ERR_invalidValue(instruction[-1], '1')
-			return 0
+			return False
 		else:
-			fo.write("{}{}{}".format("14", "0e f0", "%2.2x"%temp))
-			return 1
+			if not assembly_failed:
+				fo.write("{}{}{}".format("14", "0e f0", "%2.2x"%temp))
+			return True
 	elif len(instruction[1]) == 3 and instruction[1][0] == 'h':
 		bottom_byte = []
 		for c in instruction[1][1:]:
@@ -307,40 +320,43 @@ def instr_Int(instruction, pointers, fo):
 				bottom_byte.append(c)
 			else:
 				CustomError.ERR_invalidValue(instruction[-1], '1')
-				return 0
-		fo.write("{}{}{}".format("14", "0e f0", instruction[1][1:]))
-		return 1
+				return False
+		if not assembly_failed:
+			fo.write("{}{}{}".format("14", "0e f0", instruction[1][1:]))
+		return True
 	else:
 		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "d (decimal), h (hexadecimal)")
-		return 0
+		return False
 
-def instr_Tst(instruction, pointers, fo):
+def instr_Tst(instruction, pointers, fo, assembly_failed):
 	if len(instruction) < 4:
 		if len(instruction) < 3:
 			CustomError.ERR_missingArgument(instruction[-1], '1')
-			return 0
+			return False
 		CustomError.ERR_missingArgument(instruction[-1], '2')
-		return 0
+		return False
 	if instruction[1][0] != 'r':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '1', "register reference")
-		return 0
+		return False
 	elif instruction[2][0] != 'r':
 		CustomError.ERR_invalidArgumentType(instruction[-1], '2', "register reference")
-		return 0
+		return False
 	topmid_byte_bottom_nibble = registers.get(instruction[1], None)
 	if topmid_byte_bottom_nibble == None:
 		CustomError.ERR_invalidValue(instruction[-1], '1')
-		return 0
+		return False
 	botmid_byte_top_nibble = registers.get(instruction[2], None)
 	if botmid_byte_top_nibble == None:
 		CustomError.ERR_invalidValue(instruction[-1], '2')
-		return 0
-	fo.write("{}{} {}{}".format("190", topmid_byte_bottom_nibble, botmid_byte_top_nibble, "000"))
-	return 1
+		return False
+	if not assembly_failed:
+		fo.write("{}{} {}{}".format("190", topmid_byte_bottom_nibble, botmid_byte_top_nibble, "000"))
+	return True
 
 def instr_Nop(instruction, pointers, fo):
-	fo.write("0000 0000")
-	return 1
+	if not assembly_failed:
+		fo.write("0000 0000")
+	return True
 
 instructions_repository = {
 	"jmp":	instr_Jmp,
@@ -372,5 +388,5 @@ instructions_repository = {
 	"nop":	instr_Nop
 }
 
-def resolveInstruction(instruction, pointers, fo):
-	return instructions_repository[instruction[0]](instruction, pointers, fo)
+def resolveInstruction(instruction, pointers, fo, assembly_failed):
+	return instructions_repository[instruction[0]](instruction, pointers, fo, assembly_failed)

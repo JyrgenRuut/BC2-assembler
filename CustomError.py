@@ -20,3 +20,6 @@ def ERR_invalidValue(line, position):
 
 def ERR_outOfBounds(line):
 	print(atline, line, "; Label reference results in an address outside of the allowed 64K range.")
+
+def ERR_assemblyFailed():
+	return "\nAssembly of the source file failed, please resolve all errors."

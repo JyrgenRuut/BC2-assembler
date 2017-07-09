@@ -22,9 +22,9 @@ fi.close()
 fo = open("Output.txt", "w")
 
 for instruction in instructions:
-	wasResolved = BC2instructions.resolveInstruction(instruction, pointers, fo)
-	if wasResolved == 0:
-		assembly_failed = 1
+	wasResolved = BC2instructions.resolveInstruction(instruction, pointers, fo, assembly_failed)
+	if wasResolved == False:
+		assembly_failed = True
 	counter += 1
 	if counter % 4 == 0:
 		fo.write("\n")
@@ -32,8 +32,9 @@ for instruction in instructions:
 		fo.write('\t')
 
 if assembly_failed == 1:
+	print(CustomError.ERR_assemblyFailed())
 	fo.close()
 	file_delete = open("Output.txt", "w")
-	file_delete.write("Assembly of the source file failed, please resolve all errors.")
+	file_delete.write(CustomError.ERR_assemblyFailed())
 	file_delete.close()
 
